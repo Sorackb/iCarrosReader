@@ -113,6 +113,11 @@ public class Reader {
         String complement;
         Elements options;
 
+        //TODO remover
+        if (!model.getName().startsWith("Celta")) {
+          continue;
+        }
+
         complement = model.getComplement();
         summary = this.defaults.initialize()
                 .complement(complement)
@@ -131,8 +136,15 @@ public class Reader {
   }
 
   private void readVersions(HashMap<Integer, Brand> brands) throws IOException {
+    HashSet<String> attributes = new HashSet<>();
+
     for (Brand brand : brands.values()) {
       for (Model model : brand.getModels()) {
+        //TODO remover
+        if (!model.getName().startsWith("Celta")) {
+          continue;
+        }
+
         for (Year year : model.getYears()) {
           Content versionsPrices;
           String complement;
@@ -142,20 +154,16 @@ public class Reader {
                   .complement(complement)
                   .build();
           this.navigation.request(versionsPrices);
-          this.parseVersions();
+          model.setVersions(this.parseVersions(attributes));
         }
       }
     }
   }
 
-  private void parseVersions() {
+  private List<Version> parseVersions(HashSet<String> attributes) {
     List<Version> versions = new ArrayList<>();
-    HashSet<String> attributes = new HashSet<>();
     Elements headers;
-    Elements lines;
     Element table;
-    Elements columns;
-    Integer index;
 
     table = this.navigation.getPage().select("table#dadosVersoes").first();
     headers = table.select("thead > tr:nth-child(1) > th.fundo_cinza_escuro > h2");
@@ -167,35 +175,84 @@ public class Reader {
       versions.add(version);
     }
 
+    this.readPrices(table, versions);
+    this.readAttributes(table, versions, attributes);
+
+    return versions;
+  }
+
+  private void readPrices(Element table, List<Version> versions) {
+    Elements headers;
+    Integer index;
+
     headers = table.select("thead > tr:nth-child(2) > th:not(:nth-child(1))");
 
     index = 0;
 
     for (Element header : headers) {
-      String text;
+      String text = "";
+      Elements prices;
 
-      text = header.select("span.laranja > strong").text();
+      prices = header.select("span.laranja");
+
+      for (Element price : prices) {
+        if (!text.isEmpty()) {
+          text = text + " / ";
+        }
+
+        text = text + price.text();
+      }
+
       versions.get(index).setPrice(text);
       index++;
     }
+  }
+
+  private void readAttributes(Element table, List<Version> versions, HashSet<String> attributes) {
+    Elements lines;
+    Elements columns;
+    Integer index;
 
     lines = table.select("tbody > tr");
 
     for (Element line : lines) {
       String attribute;
+      int realIndex;
+      boolean equals;
 
       attribute = line.select("th").text();
       attributes.add(attribute);
       columns = line.select("td");
+      equals = columns.size() == versions.size();
+      realIndex = 0;
       index = 0;
 
       for (Element column : columns) {
-        versions.get(index).getAttributes().put(attribute, column.text());
-        index++;
+        HashMap<String, String> versionAttributes;
+        String value = "";
+        boolean next;
+
+        if (column.hasClass("secao")) { // Optional
+          break;
+        }
+
+        versionAttributes = versions.get(index).getAttributes();
+
+        if (versionAttributes.containsKey(attribute)) {
+          value = versionAttributes.get(attribute) + " / ";
+        }
+
+        value = value + column.text();
+        versionAttributes.put(attribute, value);
+        next = (realIndex + 1) % 2 == 0;
+
+        if (equals || column.hasAttr("colspan") || next) {
+          index++;
+        }
+
+        realIndex++;
       }
     }
-
-    System.out.println("1");
   }
 
   private void arrange(HashMap<Integer, Brand> brands, List<Model> models) {

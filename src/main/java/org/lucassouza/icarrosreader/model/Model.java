@@ -22,6 +22,7 @@ public class Model {
   private Brand brand;
 
   private List<Year> years;
+  private List<Version> versions;
 
   // Constructors
   public Model() {
@@ -31,6 +32,10 @@ public class Model {
   // Setters
   public void setBrand(Brand brand) {
     this.brand = brand;
+  }
+
+  public void setVersions(List<Version> versions) {
+    this.versions = versions;
   }
 
   // Getters
@@ -52,6 +57,10 @@ public class Model {
 
   public List<Year> getYears() {
     return this.years;
+  }
+
+  public List<Version> getVersions() {
+    return versions;
   }
 
   public String getComplement() {
