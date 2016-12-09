@@ -113,11 +113,6 @@ public class Reader {
         String complement;
         Elements options;
 
-        //TODO remover
-        if (!model.getName().startsWith("Celta")) {
-          continue;
-        }
-
         complement = model.getComplement();
         summary = this.defaults.initialize()
                 .complement(complement)
@@ -140,11 +135,6 @@ public class Reader {
 
     for (Brand brand : brands.values()) {
       for (Model model : brand.getModels()) {
-        //TODO remover
-        if (!model.getName().startsWith("Celta")) {
-          continue;
-        }
-
         for (Year year : model.getYears()) {
           Content versionsPrices;
           String complement;
