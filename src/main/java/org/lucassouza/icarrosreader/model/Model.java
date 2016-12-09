@@ -1,6 +1,9 @@
 package org.lucassouza.icarrosreader.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
+import java.util.List;
+import org.lucassouza.navigation.model.Utils;
 
 /**
  *
@@ -16,15 +19,42 @@ public class Model {
   @SerializedName("marcaId")
   private int brandId;
 
+  private Brand brand;
+
+  private List<Year> years;
+
+  // Constructors
+  public Model() {
+    this.years = new ArrayList<Year>();
+  }
+
+  // Setters
+  public void setBrand(Brand brand) {
+    this.brand = brand;
+  }
+
+  // Getters
   public int getId() {
-    return id;
+    return this.id;
   }
 
   public String getName() {
-    return name;
+    return this.name;
   }
 
   public int getBrandId() {
-    return brandId;
+    return this.brandId;
+  }
+
+  public Brand getBrand() {
+    return brand;
+  }
+
+  public List<Year> getYears() {
+    return this.years;
+  }
+
+  public String getComplement() {
+    return "/" + Utils.stripAccents(this.brand.getName() + "/" + this.name).replace(" ", "-").toLowerCase();
   }
 }
