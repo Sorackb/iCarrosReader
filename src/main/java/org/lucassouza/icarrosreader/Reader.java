@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -16,6 +15,7 @@ import org.lucassouza.icarrosreader.model.Model;
 import org.lucassouza.navigation.model.Content;
 import org.lucassouza.navigation.model.Content.Initializer;
 import org.lucassouza.navigation.model.Navigation;
+import org.lucassouza.navigation.model.Utils;
 
 /**
  *
@@ -103,19 +103,22 @@ public class Reader {
   }
 
   private void readVersions(HashMap<Integer, Brand> brands) throws IOException {
+    Integer count = 0;
 
     for (Brand brand : brands.values()) {
       for (Model model : brand.getModels()) {
         Content versionsPrices;
         String complement;
 
-        complement = "/" + (brand.getName() + "/" + model.getName()).replace(" ", "-").toLowerCase() + "/versoes-e-precos";
+        complement = "/" + Utils.stripAccents(brand.getName() + "/" + model.getName()).replace(" ", "-").toLowerCase() + "/versoes-e-precos";
         versionsPrices = this.defaults.initialize()
                 .complement(complement)
                 .build();
         this.navigation.request(versionsPrices);
-        System.out.println("------------------------------------------------------------------------");
-        System.out.println(this.navigation.getPage());
+        count++;
+        System.out.println(count);
+        //System.out.println("------------------------------------------------------------------------");
+        //System.out.println(this.navigation.getPage());
       }
     }
   }
