@@ -1,5 +1,6 @@
 package org.lucassouza.icarrosreader.model;
 
+import java.util.List;
 import org.lucassouza.navigation.model.Utils;
 
 /**
@@ -8,12 +9,17 @@ import org.lucassouza.navigation.model.Utils;
  */
 public class Year {
 
-  private int year;
-  private Model model;
+  private List<Version> versions;
+  private final int year;
+  private final Model model;
 
   public Year(int year, Model model) {
     this.year = year;
     this.model = model;
+  }
+
+  public void setVersions(List<Version> versions) {
+    this.versions = versions;
   }
 
   public int getYear() {
@@ -24,8 +30,11 @@ public class Year {
     return this.model;
   }
 
+  public List<Version> getVersions() {
+    return versions;
+  }
+
   public String getComplement() {
-    return "/" + Utils.stripAccents(this.model.getBrand().getName() + "/" + this.model.getName()).replace(" ", "-").toLowerCase()
-            + "/" + this.year + "/versoes-e-precos";
+    return this.model.getComplement() + "/" + this.year + "/versoes-e-precos";
   }
 }

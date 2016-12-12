@@ -11,31 +11,24 @@ import org.lucassouza.navigation.model.Utils;
  */
 public class Model {
 
-  private int id;
-
   @SerializedName("nome")
   private String name;
 
   @SerializedName("marcaId")
   private int brandId;
 
+  private int id;
   private Brand brand;
-
   private List<Year> years;
-  private List<Version> versions;
 
   // Constructors
   public Model() {
-    this.years = new ArrayList<Year>();
+    this.years = new ArrayList<>();
   }
 
   // Setters
   public void setBrand(Brand brand) {
     this.brand = brand;
-  }
-
-  public void setVersions(List<Version> versions) {
-    this.versions = versions;
   }
 
   // Getters
@@ -59,11 +52,16 @@ public class Model {
     return this.years;
   }
 
-  public List<Version> getVersions() {
-    return versions;
-  }
-
   public String getComplement() {
-    return "/" + Utils.stripAccents(this.brand.getName() + "/" + this.name).replace(" ", "-").toLowerCase();
+    String complement;
+
+    complement = "/"
+            + Utils.stripAccents(this.brand.getName().replace("/", "-"))
+            + "/"
+            + Utils.stripAccents(this.name.replace("/", "-"));
+
+    complement = complement.replace(" ", "-").toLowerCase();
+
+    return complement;
   }
 }

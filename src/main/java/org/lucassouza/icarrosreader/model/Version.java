@@ -8,9 +8,9 @@ import java.util.HashMap;
  */
 public class Version {
 
+  private final HashMap<String, String> attributes;
   private String name;
   private String price;
-  private HashMap<String, String> attributes;
 
   public Version() {
     this.attributes = new HashMap<>();

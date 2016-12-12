@@ -1,4 +1,4 @@
-package org.lucassouza.icarrosreader;
+package org.lucassouza.icarrosreader.businessrule;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -8,59 +8,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.lucassouza.icarrosreader.controller.Comunicator;
 import org.lucassouza.icarrosreader.model.Brand;
 import org.lucassouza.icarrosreader.model.Model;
 import org.lucassouza.icarrosreader.model.Version;
 import org.lucassouza.icarrosreader.model.Year;
+import org.lucassouza.icarrosreader.type.ResourceType;
 import org.lucassouza.navigation.model.Content;
-import org.lucassouza.navigation.model.Content.Initializer;
 import org.lucassouza.navigation.model.Navigation;
 
 /**
  *
  * @author Lucas Souza [sorack@gmail.com]
  */
-public class Reader {
+public class ICarros {
 
   private final HashMap<String, String> fields;
   private final HashMap<String, String> cookies;
   private final Navigation navigation;
-  private final Initializer defaults;
+  private final Content.Initializer defaults;
   private final Gson converter;
 
-  public static void main(String[] args) {
-    Reader reader = new Reader();
-
-    try {
-      reader.read();
-    } catch (IOException ex) {
-      Logger.getLogger(Reader.class.getName()).log(Level.SEVERE, null, ex);
-    }
-  }
-
-  public Reader() {
+  public ICarros() {
     this.fields = new HashMap<>();
     this.cookies = new HashMap<>();
     this.converter = new Gson();
     this.defaults = Content.initializer()
-            .domain("http://www.icarros.com.br/");
+            .domain("http://www.icarros.com.br/")
+            .attempts(30);
     this.navigation = new Navigation(this.fields, this.cookies);
   }
 
-  public void read() throws IOException {
-    HashMap<Integer, Brand> brands;
-
-    brands = this.readBrands();
-    this.readModels(brands);
-    this.readYears(brands);
-    this.readVersions(brands);
-  }
-
-  private HashMap<Integer, Brand> readBrands() throws IOException {
+  public HashMap<Integer, Brand> readBrands() throws IOException {
     HashMap<Integer, Brand> brands = new HashMap<>();
     Elements options;
     Content access;
@@ -80,11 +61,13 @@ public class Reader {
       brands.put(id, new Brand(id, option.text()));
     });
 
+    Comunicator.getInstance().informIncrement(ResourceType.STEP);
+
     return brands;
   }
 
-  private void readModels(HashMap<Integer, Brand> brands) {
-    List<Model> models;
+  public List<Model> readModels(HashMap<Integer, Brand> brands) {
+    List<Model> models = null;
     Elements scripts;
     Type type;
 
@@ -104,10 +87,18 @@ public class Reader {
         break;
       }
     }
+
+    Comunicator.getInstance().informIncrement(ResourceType.STEP);
+
+    return models;
   }
 
-  private void readYears(HashMap<Integer, Brand> brands) throws IOException {
+  public void readYears(HashMap<Integer, Brand> brands) throws IOException {
+    Comunicator.getInstance().informAmount(ResourceType.BRAND, brands.size());
+
     for (Brand brand : brands.values()) {
+      Comunicator.getInstance().informAmount(ResourceType.MODEL, brand.getModels().size());
+
       for (Model model : brand.getModels()) {
         Content summary;
         String complement;
@@ -126,15 +117,26 @@ public class Reader {
           year = Integer.parseInt(option.val());
           model.getYears().add(new Year(year, model));
         });
+        Comunicator.getInstance().informIncrement(ResourceType.MODEL);
       }
+
+      Comunicator.getInstance().informIncrement(ResourceType.BRAND);
     }
+
+    Comunicator.getInstance().informIncrement(ResourceType.STEP);
   }
 
-  private void readVersions(HashMap<Integer, Brand> brands) throws IOException {
+  public HashSet<String> readVersions(HashMap<Integer, Brand> brands) throws IOException {
     HashSet<String> attributes = new HashSet<>();
 
+    Comunicator.getInstance().informAmount(ResourceType.BRAND, brands.size());
+
     for (Brand brand : brands.values()) {
+      Comunicator.getInstance().informAmount(ResourceType.MODEL, brand.getModels().size());
+
       for (Model model : brand.getModels()) {
+        Comunicator.getInstance().informAmount(ResourceType.YEAR, model.getYears().size());
+
         for (Year year : model.getYears()) {
           Content versionsPrices;
           String complement;
@@ -144,10 +146,20 @@ public class Reader {
                   .complement(complement)
                   .build();
           this.navigation.request(versionsPrices);
-          model.setVersions(this.parseVersions(attributes));
+          year.setVersions(this.parseVersions(attributes));
+
+          Comunicator.getInstance().informIncrement(ResourceType.YEAR);
         }
+
+        Comunicator.getInstance().informIncrement(ResourceType.MODEL);
       }
+
+      Comunicator.getInstance().informIncrement(ResourceType.BRAND);
     }
+    
+    Comunicator.getInstance().informIncrement(ResourceType.STEP);
+
+    return attributes;
   }
 
   private List<Version> parseVersions(HashSet<String> attributes) {
@@ -156,6 +168,12 @@ public class Reader {
     Element table;
 
     table = this.navigation.getPage().select("table#dadosVersoes").first();
+
+    if (table == null) {
+      System.out.println(this.navigation.getLastResponse().url().toString());
+      return versions;
+    }
+
     headers = table.select("thead > tr:nth-child(1) > th.fundo_cinza_escuro > h2");
 
     for (Element header : headers) {
@@ -183,7 +201,7 @@ public class Reader {
       String text = "";
       Elements prices;
 
-      prices = header.select("span.laranja");
+      prices = header.select(".laranja");
 
       for (Element price : prices) {
         if (!text.isEmpty()) {
@@ -201,46 +219,39 @@ public class Reader {
   private void readAttributes(Element table, List<Version> versions, HashSet<String> attributes) {
     Elements lines;
     Elements columns;
-    Integer index;
+    int versionIndex;
 
     lines = table.select("tbody > tr");
 
     for (Element line : lines) {
       String attribute;
-      int realIndex;
       boolean equals;
+
+      if (!line.select("tr.secao").isEmpty()) { // Optional
+        break;
+      }
 
       attribute = line.select("th").text();
       attributes.add(attribute);
       columns = line.select("td");
       equals = columns.size() == versions.size();
-      realIndex = 0;
-      index = 0;
+      versionIndex = 0;
 
-      for (Element column : columns) {
+      for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
         HashMap<String, String> versionAttributes;
+        Element column = columns.get(columnIndex);
         String value = "";
-        boolean next;
 
-        if (column.hasClass("secao")) { // Optional
-          break;
+        versionAttributes = versions.get(versionIndex).getAttributes();
+        value = column.text();
+
+        if (!equals && !column.hasAttr("colspan")) {
+          columnIndex = columnIndex + 1;
+          value = value + " / " + columns.get(columnIndex).text();
         }
 
-        versionAttributes = versions.get(index).getAttributes();
-
-        if (versionAttributes.containsKey(attribute)) {
-          value = versionAttributes.get(attribute) + " / ";
-        }
-
-        value = value + column.text();
         versionAttributes.put(attribute, value);
-        next = (realIndex + 1) % 2 == 0;
-
-        if (equals || column.hasAttr("colspan") || next) {
-          index++;
-        }
-
-        realIndex++;
+        versionIndex++;
       }
     }
   }
