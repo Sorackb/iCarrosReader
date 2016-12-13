@@ -1,5 +1,6 @@
 package org.lucassouza.icarrosreader.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,14 +11,17 @@ import java.util.List;
  */
 public class Year {
 
+  private final HashMap<String, String> opinions;
   private final int year;
   private final Model model;
   private final List<Version> versions;
-  private final HashMap<String, String> opinions;
+  private LocalDateTime read;
 
   public Year(int year, Model model) {
     this.year = year;
     this.model = model;
+
+    this.read = LocalDateTime.now();
     this.versions = new ArrayList<>();
     this.opinions = new HashMap<>();
   }
@@ -36,6 +40,10 @@ public class Year {
 
   public HashMap<String, String> getOpinions() {
     return opinions;
+  }
+
+  public LocalDateTime getRead() {
+    return read;
   }
 
   public String getComplement() {

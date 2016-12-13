@@ -17,12 +17,12 @@ public class Version {
   private LocalDateTime read;
 
   public Version(int id, String name, Year year) {
-    this.read = LocalDateTime.now();
-    this.attributes = new HashMap<>();
-
     this.id = id;
     this.name = name;
     this.year = year;
+
+    this.read = LocalDateTime.now();
+    this.attributes = new HashMap<>();
   }
 
   public void setPrice(String price) {

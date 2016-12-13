@@ -44,7 +44,7 @@ public class Reader extends Thread {
       Comunicator.getInstance().informAmount(ResourceType.STEP, 2);
       brands = catalog.readBrands();
       Comunicator.getInstance().informIncrement(ResourceType.STEP);
-      modelCSV.saveToFile(brands);
+      modelCSV.saveToFiles(brands);
       Comunicator.getInstance().informIncrement(ResourceType.STEP);
       Comunicator.getInstance().finish();
     } catch (Exception ex) {
