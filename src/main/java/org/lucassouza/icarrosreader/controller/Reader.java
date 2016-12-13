@@ -2,13 +2,10 @@ package org.lucassouza.icarrosreader.controller;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import org.lucassouza.icarrosreader.businessrule.Catalog;
 import org.lucassouza.icarrosreader.model.Brand;
 import org.lucassouza.icarrosreader.model.Configuration;
-import org.lucassouza.icarrosreader.model.Model;
 import org.lucassouza.icarrosreader.businessrule.ModelCSV;
 import org.lucassouza.icarrosreader.type.ResourceType;
 import org.lucassouza.tools.Hardware4Win;

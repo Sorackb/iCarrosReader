@@ -27,7 +27,7 @@ public class ModelCSV {
 
   public ModelCSV() {
     this.dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    this.dateTimeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    this.dateTimeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
   }
 
   public void saveToFiles(List<Brand> brands) throws IOException {

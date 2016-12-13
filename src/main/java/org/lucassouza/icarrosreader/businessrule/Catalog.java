@@ -62,6 +62,7 @@ public class Catalog {
     });
 
     this.readModels(brands);
+    System.out.println(this.navigation.count() + " navegações.");
 
     return new ArrayList<>(brands.values());
   }
