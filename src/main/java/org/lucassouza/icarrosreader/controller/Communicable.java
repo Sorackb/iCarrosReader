@@ -13,4 +13,6 @@ public interface Communicable {
   void informIncrement(ResourceType resourceType);
   
   void showError(String message);
+  
+  void finish();
 }

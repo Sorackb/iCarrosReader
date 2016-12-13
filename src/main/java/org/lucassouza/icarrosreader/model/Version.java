@@ -10,25 +10,31 @@ import java.util.HashMap;
 public class Version {
 
   private final HashMap<String, String> attributes;
-  private String name;
+  private final int id;
+  private final String name;
+  private final Year year;
   private String price;
   private LocalDateTime read;
 
-  public Version() {
+  public Version(int id, String name, Year year) {
     this.read = LocalDateTime.now();
     this.attributes = new HashMap<>();
-  }
 
-  public void setName(String name) {
+    this.id = id;
     this.name = name;
+    this.year = year;
   }
 
   public void setPrice(String price) {
     this.price = price;
   }
 
-  public void setRead(LocalDateTime read) {
-    this.read = read;
+  public int getId() {
+    return id;
+  }
+
+  public Year getYear() {
+    return year;
   }
 
   public String getName() {

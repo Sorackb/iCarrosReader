@@ -1,7 +1,8 @@
 package org.lucassouza.icarrosreader.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.lucassouza.navigation.model.Utils;
 
 /**
  *
@@ -9,17 +10,16 @@ import org.lucassouza.navigation.model.Utils;
  */
 public class Year {
 
-  private List<Version> versions;
   private final int year;
   private final Model model;
+  private final List<Version> versions;
+  private final HashMap<String, String> opinions;
 
   public Year(int year, Model model) {
     this.year = year;
     this.model = model;
-  }
-
-  public void setVersions(List<Version> versions) {
-    this.versions = versions;
+    this.versions = new ArrayList<>();
+    this.opinions = new HashMap<>();
   }
 
   public int getYear() {
@@ -34,7 +34,11 @@ public class Year {
     return versions;
   }
 
+  public HashMap<String, String> getOpinions() {
+    return opinions;
+  }
+
   public String getComplement() {
-    return this.model.getComplement() + "/" + this.year + "/versoes-e-precos";
+    return this.model.getComplement() + "/" + this.year;
   }
 }

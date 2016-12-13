@@ -46,4 +46,10 @@ public class Comunicator {
       observer.showError(message);
     });
   }
+
+  public void finish() {
+    this.observers.forEach((observer) -> {
+      observer.finish();
+    });
+  }
 }

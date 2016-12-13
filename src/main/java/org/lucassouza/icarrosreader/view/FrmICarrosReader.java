@@ -363,4 +363,10 @@ public class FrmICarrosReader extends JFrame implements Communicable {
     this.dispose();
     System.exit(0);
   }
+  
+  @Override
+  public void finish() {
+    this.dispose();
+    System.exit(0);
+  }
 }
