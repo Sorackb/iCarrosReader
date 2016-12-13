@@ -19,7 +19,7 @@ public class Model {
 
   private int id;
   private Brand brand;
-  private List<Year> years;
+  private final List<Year> years;
 
   // Constructors
   public Model() {

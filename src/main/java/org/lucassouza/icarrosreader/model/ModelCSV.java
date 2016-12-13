@@ -24,9 +24,11 @@ import org.lucassouza.icarrosreader.type.ResourceType;
 public class ModelCSV {
 
   private final DateTimeFormatter dateFormat;
+  private final DateTimeFormatter dateTimeFormat;
 
   public ModelCSV() {
     this.dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    this.dateTimeFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
   }
 
   public void saveToFile(HashSet<String> attributes, List<Model> models) throws IOException {
@@ -37,7 +39,7 @@ public class ModelCSV {
     File system;
 
     lines.add("sep=,");
-    lines.add("Marca,Modelo,Ano,Preço," + String.join(",", attributes));
+    lines.add("Marca,Modelo,Ano,Preço," + String.join(",", attributes) + ",\"Data da Consulta\"");
 
     models.forEach((model) -> {
       model.getYears().forEach((year) -> {
@@ -48,7 +50,8 @@ public class ModelCSV {
                   version.getName(),
                   String.valueOf(year.getYear()),
                   "\"" + version.getPrice() + "\"",
-                  this.concatAttributes(attributes, version.getAttributes()));
+                  this.concatAttributes(attributes, version.getAttributes()),
+                  "\"" + version.getRead().format(this.dateTimeFormat) + "\"");
 
           lines.add(line);
         });

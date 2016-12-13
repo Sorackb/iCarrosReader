@@ -93,7 +93,9 @@ public class ICarros {
     return models;
   }
 
-  public void readYears(HashMap<Integer, Brand> brands) throws IOException {
+  public HashSet<String> readYears(HashMap<Integer, Brand> brands) throws IOException {
+    HashSet<String> attributes = new HashSet<>();
+
     Comunicator.getInstance().informAmount(ResourceType.BRAND, brands.size());
 
     for (Brand brand : brands.values()) {
@@ -117,49 +119,35 @@ public class ICarros {
           year = Integer.parseInt(option.val());
           model.getYears().add(new Year(year, model));
         });
+
+        readVersions(attributes, model.getYears());
         Comunicator.getInstance().informIncrement(ResourceType.MODEL);
       }
 
       Comunicator.getInstance().informIncrement(ResourceType.BRAND);
     }
 
-    Comunicator.getInstance().informIncrement(ResourceType.STEP);
-  }
-
-  public HashSet<String> readVersions(HashMap<Integer, Brand> brands) throws IOException {
-    HashSet<String> attributes = new HashSet<>();
-
-    Comunicator.getInstance().informAmount(ResourceType.BRAND, brands.size());
-
-    for (Brand brand : brands.values()) {
-      Comunicator.getInstance().informAmount(ResourceType.MODEL, brand.getModels().size());
-
-      for (Model model : brand.getModels()) {
-        Comunicator.getInstance().informAmount(ResourceType.YEAR, model.getYears().size());
-
-        for (Year year : model.getYears()) {
-          Content versionsPrices;
-          String complement;
-
-          complement = year.getComplement();
-          versionsPrices = this.defaults.initialize()
-                  .complement(complement)
-                  .build();
-          this.navigation.request(versionsPrices);
-          year.setVersions(this.parseVersions(attributes));
-
-          Comunicator.getInstance().informIncrement(ResourceType.YEAR);
-        }
-
-        Comunicator.getInstance().informIncrement(ResourceType.MODEL);
-      }
-
-      Comunicator.getInstance().informIncrement(ResourceType.BRAND);
-    }
-    
     Comunicator.getInstance().informIncrement(ResourceType.STEP);
 
     return attributes;
+  }
+
+  public void readVersions(HashSet<String> attributes, List<Year> years) throws IOException {
+    Comunicator.getInstance().informAmount(ResourceType.YEAR, years.size());
+
+    for (Year year : years) {
+      Content versionsPrices;
+      String complement;
+
+      complement = year.getComplement();
+      versionsPrices = this.defaults.initialize()
+              .complement(complement)
+              .build();
+      this.navigation.request(versionsPrices);
+      year.setVersions(this.parseVersions(attributes));
+
+      Comunicator.getInstance().informIncrement(ResourceType.YEAR);
+    }
   }
 
   private List<Version> parseVersions(HashSet<String> attributes) {
@@ -227,8 +215,8 @@ public class ICarros {
       String attribute;
       boolean equals;
 
-      if (!line.select("tr.secao").isEmpty()) { // Optional
-        break;
+      if (line.hasClass("secao")) { // Optional
+        continue;
       }
 
       attribute = line.select("th").text();
@@ -240,20 +228,43 @@ public class ICarros {
       for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
         HashMap<String, String> versionAttributes;
         Element column = columns.get(columnIndex);
+        Element nextColumn;
         String value = "";
 
         versionAttributes = versions.get(versionIndex).getAttributes();
-        value = column.text();
+        value = this.getValueOfAttribute(column);
 
         if (!equals && !column.hasAttr("colspan")) {
           columnIndex = columnIndex + 1;
-          value = value + " / " + columns.get(columnIndex).text();
+          nextColumn = columns.get(columnIndex);
+          value = value + " / " + this.getValueOfAttribute(nextColumn);
         }
 
         versionAttributes.put(attribute, value);
         versionIndex++;
       }
     }
+  }
+
+  private String getValueOfAttribute(Element column) {
+    Element span;
+    String value = "";
+
+    span = column.select("span.icone").first();
+
+    if (span != null) {
+      if (span.hasClass("icoindisponivel")) {
+        value = "Indisponível";
+      } else if (span.hasClass("icoopcional")) {
+        value = "Opcional";
+      } else if (span.hasClass("icodisponivel")) {
+        value = "Disponível";
+      }
+    } else {
+      value = column.text();
+    }
+
+    return value;
   }
 
   private void arrange(HashMap<Integer, Brand> brands, List<Model> models) {

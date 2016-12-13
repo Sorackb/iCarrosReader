@@ -1,10 +1,7 @@
 package org.lucassouza.icarrosreader.controller;
 
 import java.math.BigInteger;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,11 +43,10 @@ public class Reader extends Thread {
         throw new Exception("Permissão de uso negada. Contate o fornecedor para desbloquear o uso.\nsorackb@gmail.com");
       }
       
-      Comunicator.getInstance().informAmount(ResourceType.STEP, 5);
+      Comunicator.getInstance().informAmount(ResourceType.STEP, 4);
       brands = iCarros.readBrands();
       models = iCarros.readModels(brands);
-      iCarros.readYears(brands);
-      attributes = iCarros.readVersions(brands);
+      attributes = iCarros.readYears(brands);
       modelCSV.saveToFile(attributes, models);
     } catch (Exception ex) {
       Comunicator.getInstance().showError(ex.getMessage());

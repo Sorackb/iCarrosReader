@@ -1,5 +1,6 @@
 package org.lucassouza.icarrosreader.model;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -11,8 +12,10 @@ public class Version {
   private final HashMap<String, String> attributes;
   private String name;
   private String price;
+  private LocalDateTime read;
 
   public Version() {
+    this.read = LocalDateTime.now();
     this.attributes = new HashMap<>();
   }
 
@@ -22,6 +25,10 @@ public class Version {
 
   public void setPrice(String price) {
     this.price = price;
+  }
+
+  public void setRead(LocalDateTime read) {
+    this.read = read;
   }
 
   public String getName() {
@@ -34,5 +41,9 @@ public class Version {
 
   public HashMap<String, String> getAttributes() {
     return attributes;
+  }
+
+  public LocalDateTime getRead() {
+    return read;
   }
 }
