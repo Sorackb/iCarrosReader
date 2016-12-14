@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
@@ -23,11 +23,9 @@ import org.lucassouza.tools.Hardware4Win;
  */
 public class Start {
 
-  private final CMD cmd;
   private final Path path;
 
   public Start() {
-    this.cmd = new CMD();
     String systemPath;
     File system;
 
@@ -46,7 +44,7 @@ public class Start {
   }
 
   public void register() {
-    this.cmd.execute("cd \"" + this.path.toString() + "\"", "java -jar Register.jar", "del register.jar");
+    CMD.execute("cd \"" + this.path.toString() + "\"", "java -jar Register.jar", "del register.jar");
   }
 
   public void checkSerial() throws Exception {
@@ -54,7 +52,7 @@ public class Start {
     String serialNumber;
     String md5;
 
-    serialNumber = Hardware4Win.getSerialNumber();
+    serialNumber = Hardware4Win.getSerialNumber(Hardware4Win.WMICType.BIOS);
     digest = MessageDigest.getInstance("MD5");
     digest.update(serialNumber.getBytes(), 0, serialNumber.length());
     md5 = new BigInteger(1, digest.digest()).toString(16);
@@ -90,7 +88,7 @@ public class Start {
 
     destination = Paths.get(this.path.toString() + "/CreateShortcut.vbs");
     lines = Arrays.asList(vbscript.split(System.lineSeparator())); // Transforma as linhas em lista
-    Files.write(destination, lines, UTF_8, CREATE_NEW); // Salva o arquivo com as informações corretas
-    this.cmd.execute("cd \"" + this.path.toString() + "\"", "cscript CreateShortcut.vbs", "del CreateShortcut.vbs");
+    Files.write(destination, lines, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW); // Salva o arquivo com as informações corretas
+    CMD.execute("cd \"" + this.path.toString() + "\"", "cscript CreateShortcut.vbs", "del CreateShortcut.vbs");
   }
 }
