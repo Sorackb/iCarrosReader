@@ -46,6 +46,7 @@ public class VersionsAndPrices {
 
     if (table == null) {
       System.out.println(this.navigation.getLastResponse().url().toString());
+      return;
     }
 
     lines = table.select("tbody > tr");
