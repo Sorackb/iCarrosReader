@@ -1,8 +1,7 @@
-package org.lucassouza.icarrosreader.model;
+package org.lucassouza.icarrosreader.businessrule;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lucassouza.tools.PropertyTool;
@@ -36,12 +35,12 @@ public class Configuration {
       }
     }
   }
-  
+
   public static PropertyTool getIni() {
-    if (iniFile == null)  {
+    if (iniFile == null) {
       readFile();
     }
-    
+
     return iniFile;
   }
 }
