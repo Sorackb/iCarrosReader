@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
@@ -45,23 +45,46 @@ public class ModelXLS {
     FileOutputStream file;
     Workbook workbook;
 
-    workbook = new HSSFWorkbook();
-    this.saveToInformationFile(workbook, brands);
-    this.saveToOpinionFile(workbook, brands);
+    workbook = new XSSFWorkbook();
+    this.writeVersionsAndPricesSheet(workbook, brands);
+    this.writeInformationSheet(workbook, brands);
+    this.writeToOpinionSheet(workbook, brands);
 
     file = new FileOutputStream(this.path + "icarros.xlsx");
     workbook.write(file);
     file.close();
   }
 
-  private void saveToInformationFile(Workbook workbook, List<Brand> brands) throws IOException {
+  private void writeVersionsAndPricesSheet(Workbook workbook, List<Brand> brands) throws IOException {
+    ArrayList<String> versionsAndPrices;
+    Sheet sheet;
+    int index;
+
+    versionsAndPrices = this.getVersionsAndPrices(brands);
+    sheet = workbook.createSheet("Versões e preços");
+    this.createVersionsAndPricesHeader(versionsAndPrices, sheet);
+    index = 1;
+
+    for (Brand brand : brands) {
+      for (Model model : brand.getModels()) {
+        for (Year year : model.getYears()) {
+          for (Version version : year.getVersions()) {
+            this.createVersionsAndPricesRow(versionsAndPrices, sheet, version, index);
+            index++;
+          }
+        }
+      }
+    }
+  }
+
+  private void writeInformationSheet(Workbook workbook, List<Brand> brands) throws IOException {
     ArrayList<String> informations;
     Sheet sheet;
     int index;
 
     informations = this.getInformations(brands);
-    sheet = workbook.createSheet("Informações");
-    this.createInformationHeader(informations, sheet, 0);
+    sheet = workbook.createSheet("Informações técnicas");
+    this.createInformationHeader(informations, sheet);
     index = 1;
 
     for (Brand brand : brands) {
@@ -76,7 +99,7 @@ public class ModelXLS {
     }
   }
 
-  private void saveToOpinionFile(Workbook workbook, List<Brand> brands) throws IOException {
+  private void writeToOpinionSheet(Workbook workbook, List<Brand> brands) throws IOException {
     ArrayList<String> opinions;
 
     Sheet sheet;
@@ -84,7 +107,7 @@ public class ModelXLS {
 
     opinions = this.getOpinions(brands);
     sheet = workbook.createSheet("Opiniões");
-    this.createOpinionHeader(opinions, sheet, 0);
+    this.createOpinionHeader(opinions, sheet);
     index = 1;
 
     for (Brand brand : brands) {
@@ -97,90 +120,112 @@ public class ModelXLS {
     }
   }
 
-  private void createInformationHeader(ArrayList<String> informations, Sheet sheet, int rowIndex) {
-    CellStyle style;
-    Row row;
-    int index;
+  private void createVersionsAndPricesHeader(ArrayList<String> versionsAndPrices, Sheet sheet) {
+    ArrayList<String> labels = new ArrayList<>();
 
-    style = sheet.getWorkbook().createCellStyle();
-    Font font = sheet.getWorkbook().createFont();
-    font.setBold(true);
-    style.setFont(font);
+    labels.add("Marca");
+    labels.add("Modelo");
+    labels.add("Ano");
+    labels.add("Preço");
+    labels.addAll(versionsAndPrices);
+    labels.add("Data da Consulta");
 
-    row = sheet.createRow(rowIndex);
-    row.createCell(0).setCellValue("Marca");
-    row.createCell(1).setCellValue("Modelo");
-    row.createCell(2).setCellValue("Ano");
-    row.createCell(3).setCellValue("Preço");
+    this.createHeader(labels, sheet);
+  }
 
-    for (index = 0; index < informations.size(); index++) {
-      row.createCell(index + 4).setCellValue(informations.get(index));
+  private void createInformationHeader(ArrayList<String> informations, Sheet sheet) {
+    ArrayList<String> labels = new ArrayList<>();
+
+    labels.add("Marca");
+    labels.add("Modelo");
+    labels.add("Ano");
+    labels.add("Preço");
+    labels.addAll(informations);
+    labels.add("Data da Consulta");
+
+    this.createHeader(labels, sheet);
+  }
+
+  private void createOpinionHeader(ArrayList<String> opinions, Sheet sheet) {
+    ArrayList<String> labels = new ArrayList<>();
+
+    labels.add("Marca");
+    labels.add("Modelo");
+    labels.add("Ano");
+    labels.addAll(opinions);
+    labels.add("Data da Consulta");
+
+    this.createHeader(labels, sheet);
+  }
+
+  private void createVersionsAndPricesRow(ArrayList<String> versionsAndPrices, Sheet sheet, Version version, int rowIndex) {
+    ArrayList<String> cells = new ArrayList();
+
+    cells.add(version.getYear().getModel().getBrand().getName());
+    cells.add(version.getName());
+    cells.add(String.valueOf(version.getYear().getYear()));
+    cells.add(version.getPrice());
+
+    for (String versionAndPrice : versionsAndPrices) {
+      cells.add(version.getAttributes().get(versionAndPrice));
     }
 
-    row.createCell(index + 4).setCellValue("Data da Consulta");
+    cells.add(version.getRead().format(this.dateTimeFormat));
 
-    for (index = 0; index < row.getLastCellNum(); index++) {
-      row.getCell(index).setCellStyle(style);
-    }
+    this.createRow(cells, sheet, rowIndex);
   }
 
   private void createInformationRow(ArrayList<String> informations, Sheet sheet, Version version, int rowIndex) {
-    Row row;
-    int index;
+    ArrayList<String> cells = new ArrayList();
 
-    row = sheet.createRow(rowIndex);
-    row.createCell(0).setCellValue(version.getYear().getModel().getBrand().getName());
-    row.createCell(1).setCellValue(version.getName());
-    row.createCell(2).setCellValue(version.getYear().getYear());
-    row.createCell(3).setCellValue(version.getPrice());
+    cells.add(version.getYear().getModel().getBrand().getName());
+    cells.add(version.getName());
+    cells.add(String.valueOf(version.getYear().getYear()));
+    cells.add(version.getPrice());
 
-    for (index = 0; index < informations.size(); index++) {
-      row.createCell(index + 4).setCellValue(version.getAttributes().get(informations.get(index)));
+    for (String information : informations) {
+      cells.add(version.getInformations().get(information));
     }
 
-    row.createCell(index + 4).setCellValue(version.getRead().format(this.dateTimeFormat));
-  }
+    cells.add(version.getRead().format(this.dateTimeFormat));
 
-  private void createOpinionHeader(ArrayList<String> opinions, Sheet sheet, int rowIndex) {
-    CellStyle style;
-    Row row;
-    int index;
-
-    style = sheet.getWorkbook().createCellStyle();
-    Font font = sheet.getWorkbook().createFont();
-    font.setBold(true);
-    style.setFont(font);
-
-    row = sheet.createRow(rowIndex);
-    row.createCell(0).setCellValue("Marca");
-    row.createCell(1).setCellValue("Modelo");
-    row.createCell(2).setCellValue("Ano");
-
-    for (index = 0; index < opinions.size(); index++) {
-      row.createCell(index + 3).setCellValue(opinions.get(index));
-    }
-
-    row.createCell(index + 3).setCellValue("Data da Consulta");
-
-    for (index = 0; index < row.getLastCellNum(); index++) {
-      row.getCell(index).setCellStyle(style);
-    }
+    this.createRow(cells, sheet, rowIndex);
   }
 
   private void createOpinionRow(ArrayList<String> opinions, Sheet sheet, Year year, int rowIndex) {
-    Row row;
-    int index;
+    ArrayList<String> cells = new ArrayList();
 
-    row = sheet.createRow(rowIndex);
-    row.createCell(0).setCellValue(year.getModel().getBrand().getName());
-    row.createCell(1).setCellValue(year.getModel().getName());
-    row.createCell(2).setCellValue(year.getYear());
+    cells.add(year.getModel().getBrand().getName());
+    cells.add(year.getModel().getName());
+    cells.add(String.valueOf(year.getYear()));
 
-    for (index = 0; index < opinions.size(); index++) {
-      row.createCell(index + 3).setCellValue(year.getOpinions().get(opinions.get(index)));
+    for (String opinion : opinions) {
+      cells.add(year.getOpinions().get(opinion));
     }
 
-    row.createCell(index + 3).setCellValue(year.getRead().format(this.dateTimeFormat));
+    cells.add(year.getRead().format(this.dateTimeFormat));
+
+    this.createRow(cells, sheet, rowIndex);
+  }
+
+  private ArrayList<String> getVersionsAndPrices(List<Brand> brands) {
+    ArrayList<String> attributes = new ArrayList<>();
+
+    brands.forEach((brand) -> {
+      brand.getModels().forEach((model) -> {
+        model.getYears().forEach((year) -> {
+          year.getVersions().forEach((version) -> {
+            for (String attribute : version.getAttributes().keySet()) {
+              if (!attributes.contains(attribute)) {
+                attributes.add(attribute);
+              }
+            }
+          });
+        });
+      });
+    });
+
+    return attributes;
   }
 
   private ArrayList<String> getInformations(List<Brand> brands) {
@@ -190,9 +235,9 @@ public class ModelXLS {
       brand.getModels().forEach((model) -> {
         model.getYears().forEach((year) -> {
           year.getVersions().forEach((version) -> {
-            for (String attribute : version.getAttributes().keySet()) {
-              if (!informations.contains(attribute)) {
-                informations.add(attribute);
+            for (String information : version.getInformations().keySet()) {
+              if (!informations.contains(information)) {
+                informations.add(information);
               }
             }
           });
@@ -219,5 +264,37 @@ public class ModelXLS {
     });
 
     return opinions;
+  }
+
+  private void createHeader(ArrayList<String> labels, Sheet sheet) {
+    CellStyle style;
+    Row row;
+    int index;
+
+    row = sheet.createRow(0);
+
+    for (index = 0; index < labels.size(); index++) {
+      row.createCell(index).setCellValue(labels.get(index));
+    }
+
+    // Apply bold style    
+    style = sheet.getWorkbook().createCellStyle();
+    Font font = sheet.getWorkbook().createFont();
+    font.setBold(true);
+    style.setFont(font);
+
+    for (index = 0; index < row.getLastCellNum(); index++) {
+      row.getCell(index).setCellStyle(style);
+    }
+  }
+
+  private void createRow(ArrayList<String> cells, Sheet sheet, int rowIndex) {
+    Row row;
+
+    row = sheet.createRow(rowIndex);
+
+    for (int index = 0; index < cells.size(); index++) {
+      row.createCell(index).setCellValue(cells.get(index));
+    }
   }
 }

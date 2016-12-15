@@ -10,6 +10,7 @@ import java.util.HashMap;
 public class Version {
 
   private final HashMap<String, String> attributes;
+  private final HashMap<String, String> informations;
   private final int id;
   private final String name;
   private final Year year;
@@ -23,6 +24,7 @@ public class Version {
 
     this.read = LocalDateTime.now();
     this.attributes = new HashMap<>();
+    this.informations = new HashMap<>();
   }
 
   public void setPrice(String price) {
@@ -47,6 +49,10 @@ public class Version {
 
   public HashMap<String, String> getAttributes() {
     return attributes;
+  }
+  
+  public HashMap<String, String> getInformations() {
+    return informations;
   }
 
   public LocalDateTime getRead() {

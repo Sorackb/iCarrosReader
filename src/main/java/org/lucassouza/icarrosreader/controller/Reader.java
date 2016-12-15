@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.lucassouza.icarrosreader.businessrule.Catalog;
 import org.lucassouza.icarrosreader.model.Brand;
 import org.lucassouza.icarrosreader.businessrule.ModelCSV;
+import org.lucassouza.icarrosreader.businessrule.ModelXLS;
 import org.lucassouza.icarrosreader.businessrule.Start;
 import org.lucassouza.icarrosreader.type.ResourceType;
 
@@ -18,7 +19,8 @@ public class Reader extends Thread {
   @Override
   public void run() {
     Catalog catalog;
-    ModelCSV modelCSV;
+    //ModelCSV modelCSV;
+    ModelXLS modelXLS;
     List<Brand> brands;
     Start start;
 
@@ -29,13 +31,15 @@ public class Reader extends Thread {
       start.checkSerial();
       start.createShortcut();
 
-      modelCSV = new ModelCSV();
+      //modelCSV = new ModelCSV();
+      modelXLS = new ModelXLS();
       catalog = new Catalog();
 
       Comunicator.getInstance().informAmount(ResourceType.STEP, 2);
       brands = catalog.readBrands();
       Comunicator.getInstance().informIncrement(ResourceType.STEP);
-      modelCSV.saveToFiles(brands);
+      //modelCSV.saveToFiles(brands);
+      modelXLS.saveToFiles(brands);
       Comunicator.getInstance().informIncrement(ResourceType.STEP);
       Comunicator.getInstance().finish();
     } catch (Exception ex) {

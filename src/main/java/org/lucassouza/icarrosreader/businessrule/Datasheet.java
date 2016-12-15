@@ -123,11 +123,10 @@ public class Datasheet {
     this.navigation.request(byVersion);
 
     version.setPrice(this.navigation.getPage().select("div#preco > span").text());
-    this.fillAttributes(version);
+    this.fillInformations(version);
   }
 
-  private void fillAttributes(Version version) {
-    List<String> itens = new ArrayList<>();
+  private void fillInformations(Version version) {
     String[] transition;
     Elements lines;
 
@@ -143,21 +142,30 @@ public class Datasheet {
       columns = line.select("td:not(:nth-of-type(1))");
 
       for (Element column : columns) {
-        values.add(column.text());
+        String value;
+
+        value = column.text().trim();
+
+        if (!value.isEmpty()) {
+          values.add(value);
+        }
       }
 
       transition = values.toArray(new String[values.size()]);
-      version.getAttributes().put(attribute, String.join(" - ", transition));
+      version.getInformations().put(attribute, String.join(" - ", transition));
     }
 
     // Serial itens
     lines = this.navigation.getPage().select("table#itensDeSerie > tbody > tr");
 
     for (Element line : lines) {
-      itens.add(line.text());
-    }
+      String serialItem;
 
-    transition = itens.toArray(new String[itens.size()]);
-    version.getAttributes().put("Itens de Série", String.join(System.lineSeparator(), transition));
+      serialItem = line.text().trim();
+
+      if (!serialItem.isEmpty()) {
+        version.getInformations().put(line.text(), "Incluído");
+      }
+    }
   }
 }

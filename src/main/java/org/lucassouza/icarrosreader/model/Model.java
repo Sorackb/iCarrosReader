@@ -3,7 +3,7 @@ package org.lucassouza.icarrosreader.model;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
-import org.lucassouza.navigation.model.Utils;
+import org.lucassouza.tools.GeneralTool;
 
 /**
  *
@@ -56,9 +56,9 @@ public class Model {
     String complement;
 
     complement = "/"
-            + Utils.stripAccents(this.brand.getName().replace("/", "-"))
+            + GeneralTool.stripAccents(this.brand.getName().replace("/", "-"))
             + "/"
-            + Utils.stripAccents(this.name.replace("/", "-"));
+            + GeneralTool.stripAccents(this.name.replace("/", "-"));
 
     complement = complement.replace(" ", "-").toLowerCase();
 
