@@ -42,15 +42,19 @@ public class ModelXLS {
   }
 
   public void saveToFiles(List<Brand> brands) throws IOException {
+    FileOutputStream file;
     Workbook workbook;
-    
+
     workbook = new HSSFWorkbook();
     this.saveToInformationFile(workbook, brands);
     this.saveToOpinionFile(workbook, brands);
+
+    file = new FileOutputStream(this.path + "icarros.xlsx");
+    workbook.write(file);
+    file.close();
   }
 
   private void saveToInformationFile(Workbook workbook, List<Brand> brands) throws IOException {
-    FileOutputStream file;
     ArrayList<String> informations;
     Sheet sheet;
     int index;
@@ -70,16 +74,11 @@ public class ModelXLS {
         }
       }
     }
-
-    file = new FileOutputStream(this.path + "informacoes.xlsx");
-    workbook.write(file);
-    file.close();
   }
 
   private void saveToOpinionFile(Workbook workbook, List<Brand> brands) throws IOException {
-    FileOutputStream file;
     ArrayList<String> opinions;
-    
+
     Sheet sheet;
     int index;
 
@@ -96,10 +95,6 @@ public class ModelXLS {
         }
       }
     }
-
-    file = new FileOutputStream(this.path + "opinioes.xlsx");
-    workbook.write(file);
-    file.close();
   }
 
   private void createInformationHeader(ArrayList<String> informations, Sheet sheet, int rowIndex) {
