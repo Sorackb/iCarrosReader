@@ -58,7 +58,7 @@ public class ModelCSV {
     File system;
 
     lines.add("sep=,");
-    lines.add("Marca,Modelo,Ano,Preço," + String.join(",", attributes) + ",\"Data da Consulta\"");
+    lines.add("Marca,Modelo,Ano,Preço," + this.join(attributes) + ",\"Data da Consulta\"");
 
     brands.forEach((brand) -> {
       brand.getModels().forEach((model) -> {
@@ -101,7 +101,7 @@ public class ModelCSV {
     File system;
 
     lines.add("sep=,");
-    lines.add("Marca,Modelo,Ano," + String.join(",", opinions) + ",\"Data da Consulta\"");
+    lines.add("Marca,Modelo,Ano," + this.join(opinions) + ",\"Data da Consulta\"");
 
     brands.forEach((brand) -> {
       brand.getModels().forEach((model) -> {
@@ -151,5 +151,19 @@ public class ModelCSV {
 
   private void saveToFile(Path path, List<String> lines) throws IOException {
     Files.write(path, lines, UTF_8, APPEND, CREATE);
+  }
+
+  private String join(Iterable<? extends CharSequence> elements) {
+    String resultado = "";
+
+    for (CharSequence element : elements) {
+      if (!resultado.isEmpty()) {
+        resultado = resultado + ",";
+      }
+
+      resultado = resultado + "\"" + element.toString() + "\"";
+    }
+
+    return resultado;
   }
 }
