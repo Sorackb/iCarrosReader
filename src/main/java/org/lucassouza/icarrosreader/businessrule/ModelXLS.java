@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -56,7 +57,7 @@ public class ModelXLS {
   }
 
   private void writeVersionsAndPricesSheet(Workbook workbook, List<Brand> brands) throws IOException {
-    ArrayList<String> versionsAndPrices;
+    HashSet<String> versionsAndPrices;
     Sheet sheet;
     int index;
 
@@ -78,7 +79,7 @@ public class ModelXLS {
   }
 
   private void writeInformationSheet(Workbook workbook, List<Brand> brands) throws IOException {
-    ArrayList<String> informations;
+    HashSet<String> informations;
     Sheet sheet;
     int index;
 
@@ -100,7 +101,7 @@ public class ModelXLS {
   }
 
   private void writeToOpinionSheet(Workbook workbook, List<Brand> brands) throws IOException {
-    ArrayList<String> opinions;
+    HashSet<String> opinions;
 
     Sheet sheet;
     int index;
@@ -120,7 +121,7 @@ public class ModelXLS {
     }
   }
 
-  private void createVersionsAndPricesHeader(ArrayList<String> versionsAndPrices, Sheet sheet) {
+  private void createVersionsAndPricesHeader(HashSet<String> versionsAndPrices, Sheet sheet) {
     ArrayList<String> labels = new ArrayList<>();
 
     labels.add("Marca");
@@ -133,20 +134,21 @@ public class ModelXLS {
     this.createHeader(labels, sheet);
   }
 
-  private void createInformationHeader(ArrayList<String> informations, Sheet sheet) {
+  private void createInformationHeader(HashSet<String> informations, Sheet sheet) {
     ArrayList<String> labels = new ArrayList<>();
 
     labels.add("Marca");
     labels.add("Modelo");
     labels.add("Ano");
     labels.add("Preço");
+    informations.forEach(System.out::println);
     labels.addAll(informations);
     labels.add("Data da Consulta");
 
     this.createHeader(labels, sheet);
   }
 
-  private void createOpinionHeader(ArrayList<String> opinions, Sheet sheet) {
+  private void createOpinionHeader(HashSet<String> opinions, Sheet sheet) {
     ArrayList<String> labels = new ArrayList<>();
 
     labels.add("Marca");
@@ -158,7 +160,7 @@ public class ModelXLS {
     this.createHeader(labels, sheet);
   }
 
-  private void createVersionsAndPricesRow(ArrayList<String> versionsAndPrices, Sheet sheet, Version version, int rowIndex) {
+  private void createVersionsAndPricesRow(HashSet<String> versionsAndPrices, Sheet sheet, Version version, int rowIndex) {
     ArrayList<String> cells = new ArrayList();
 
     cells.add(version.getYear().getModel().getBrand().getName());
@@ -166,16 +168,16 @@ public class ModelXLS {
     cells.add(String.valueOf(version.getYear().getYear()));
     cells.add(version.getPrice());
 
-    for (String versionAndPrice : versionsAndPrices) {
+    versionsAndPrices.forEach((versionAndPrice) -> {
       cells.add(version.getAttributes().get(versionAndPrice));
-    }
+    });
 
     cells.add(version.getRead().format(this.dateTimeFormat));
 
     this.createRow(cells, sheet, rowIndex);
   }
 
-  private void createInformationRow(ArrayList<String> informations, Sheet sheet, Version version, int rowIndex) {
+  private void createInformationRow(HashSet<String> informations, Sheet sheet, Version version, int rowIndex) {
     ArrayList<String> cells = new ArrayList();
 
     cells.add(version.getYear().getModel().getBrand().getName());
@@ -183,33 +185,33 @@ public class ModelXLS {
     cells.add(String.valueOf(version.getYear().getYear()));
     cells.add(version.getPrice());
 
-    for (String information : informations) {
+    informations.forEach((information) -> {
       cells.add(version.getInformations().get(information));
-    }
+    });
 
     cells.add(version.getRead().format(this.dateTimeFormat));
 
     this.createRow(cells, sheet, rowIndex);
   }
 
-  private void createOpinionRow(ArrayList<String> opinions, Sheet sheet, Year year, int rowIndex) {
+  private void createOpinionRow(HashSet<String> opinions, Sheet sheet, Year year, int rowIndex) {
     ArrayList<String> cells = new ArrayList();
 
     cells.add(year.getModel().getBrand().getName());
     cells.add(year.getModel().getName());
     cells.add(String.valueOf(year.getYear()));
 
-    for (String opinion : opinions) {
+    opinions.forEach((opinion) -> {
       cells.add(year.getOpinions().get(opinion));
-    }
+    });
 
     cells.add(year.getRead().format(this.dateTimeFormat));
 
     this.createRow(cells, sheet, rowIndex);
   }
 
-  private ArrayList<String> getVersionsAndPrices(List<Brand> brands) {
-    ArrayList<String> attributes = new ArrayList<>();
+  private HashSet<String> getVersionsAndPrices(List<Brand> brands) {
+    HashSet<String> attributes = new HashSet<>();
 
     brands.forEach((brand) -> {
       brand.getModels().forEach((model) -> {
@@ -228,8 +230,8 @@ public class ModelXLS {
     return attributes;
   }
 
-  private ArrayList<String> getInformations(List<Brand> brands) {
-    ArrayList<String> informations = new ArrayList<>();
+  private HashSet<String> getInformations(List<Brand> brands) {
+    HashSet<String> informations = new HashSet<>();
 
     brands.forEach((brand) -> {
       brand.getModels().forEach((model) -> {
@@ -248,8 +250,8 @@ public class ModelXLS {
     return informations;
   }
 
-  private ArrayList<String> getOpinions(List<Brand> brands) {
-    ArrayList<String> opinions = new ArrayList<>();
+  private HashSet<String> getOpinions(List<Brand> brands) {
+    HashSet<String> opinions = new HashSet<>();
 
     brands.forEach((brand) -> {
       brand.getModels().forEach((model) -> {
