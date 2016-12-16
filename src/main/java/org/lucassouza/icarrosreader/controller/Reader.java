@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lucassouza.icarrosreader.businessrule.Catalog;
 import org.lucassouza.icarrosreader.model.Brand;
-import org.lucassouza.icarrosreader.businessrule.ModelCSV;
 import org.lucassouza.icarrosreader.businessrule.ModelXLS;
 import org.lucassouza.icarrosreader.businessrule.Start;
 import org.lucassouza.icarrosreader.type.ResourceType;

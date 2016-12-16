@@ -93,7 +93,6 @@ public class Catalog {
 
     for (Brand brand : brands.values()) {
       this.datasheet.fillModels(brand.getModels());
-
       Comunicator.getInstance().informIncrement(ResourceType.BRAND);
     }
 
