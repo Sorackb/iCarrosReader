@@ -25,13 +25,44 @@ import org.lucassouza.navigation.model.Navigation;
  */
 public class Datasheet {
 
-  private final Pattern airbag = Pattern.compile("(.*)(air)([\\s\\-]*)(bag)(.*)", Pattern.CASE_INSENSITIVE);
-  private final Pattern arCondicionado = Pattern.compile("(.*)(ar)([\\s\\-]*)(condicionado)(.*)", Pattern.CASE_INSENSITIVE);
-  private final Pattern descansa = Pattern.compile("(.*)(descansa)([\\s\\-]*)(braço|pé)(.*)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern AIRBAG;
+  private static final Pattern AR_CONDICIONADO;
+  private static final Pattern DESCANSA;
+  private static final String[] PREFIXES;
+
   private final Navigation navigation;
   private final Content.Initializer defaults;
   private final VersionsAndPrices versionsAndPrices;
   private final Opinions opinions;
+
+  static {
+    AIRBAG = Pattern.compile("(.*)(air)([\\s\\-]*)(bag)(.*)", Pattern.CASE_INSENSITIVE);
+    AR_CONDICIONADO = Pattern.compile("(.*)(ar)([\\s\\-]*)(condicionado)(.*)", Pattern.CASE_INSENSITIVE);
+    DESCANSA = Pattern.compile("(.*)(descansa)([\\s\\-]*)(braço|pé)(.*)", Pattern.CASE_INSENSITIVE);
+
+    PREFIXES = new String[]{
+      "Alteração de preços",
+      "Capacidade de carga:",
+      "Carroceria com",
+      "Coeficiente aerodinâmico:",
+      "Consumo de combustível secundário:",
+      "Consumo de combustível:",
+      "Critério de Classificação do Pesquisador",
+      "Dimensões Internas:",
+      "Equipamento de som",
+      "Especificações de SUV:",
+      "Pneus:",
+      "Pneus",
+      "Pneu",
+      "Relação de transmissão",
+      "SUV especificações",
+      "Suspensão",
+      "Tela com multi-funções",
+      "Transmissão",
+      "Travamento",
+      "Tração"
+    };
+  }
 
   public Datasheet(Navigation navigation, Content.Initializer defaults) {
     this.navigation = navigation;
@@ -172,65 +203,15 @@ public class Datasheet {
   private void addInformation(HashMap<String, String> informations, String information) {
     String key = "";
     String value = "";
-    String[] prefixes;
-    Matcher matcher;
     String last;
 
-    prefixes = new String[]{
-      "Alteração de preços",
-      "Capacidade de carga:",
-      "Carroceria com",
-      "Coeficiente aerodinâmico:",
-      "Consumo de combustível secundário:",
-      "Consumo de combustível:",
-      "Critério de Classificação do Pesquisador",
-      "Dimensões Internas:",
-      "Equipamento de som",
-      "Especificações de SUV:",
-      "Pneus:",
-      "Pneus",
-      "Pneu",
-      "Relação de transmissão",
-      "SUV especificações",
-      "Suspensão",
-      "Tela com multi-funções",
-      "Transmissão",
-      "Travamento",
-      "Tração"
-    };
-
-    information = information.replaceAll("^-", "");
-    information = information.replace(" ", " "); // caracter estranho
-    information = information.replaceAll("\\s+", " "); // Remove espaços duplicados
-
-    // Airbag
-    matcher = this.airbag.matcher(information);
-
-    if (matcher.find()) {
-      information = matcher.replaceAll("$1$2$4$5");
-    }
-
-    // Ar-condicionado
-    matcher = this.arCondicionado.matcher(information);
-
-    if (matcher.find()) {
-      information = matcher.replaceAll("$1$2\\-$4$5");
-    }
-
-    // Descança-braço
-    matcher = this.descansa.matcher(information);
-
-    if (matcher.find()) {
-      information = matcher.replaceAll("$1$2\\-$4$5");
-    }
-
-    information = information.trim();
+    information = this.normalizeInformation(information);
 
     if (information.isEmpty()) {
       return;
     }
 
-    for (String prefix : prefixes) {
+    for (String prefix : PREFIXES) {
       String real;
 
       real = prefix.replaceAll("[:\\.]$", ""); // Remove ":" no final
@@ -262,5 +243,38 @@ public class Datasheet {
     }
 
     informations.put(key, value);
+  }
+
+  private String normalizeInformation(String information) {
+    Matcher matcher;
+
+    information = information.replaceAll("^-", "");
+    information = information.replace(" ", " "); // caracter estranho
+    information = information.replaceAll("\\s+", " "); // Remove espaços duplicados
+
+    // Airbag
+    matcher = AIRBAG.matcher(information);
+
+    if (matcher.find()) {
+      information = matcher.replaceAll("$1$2$4$5");
+    }
+
+    // Ar-condicionado
+    matcher = AR_CONDICIONADO.matcher(information);
+
+    if (matcher.find()) {
+      information = matcher.replaceAll("$1$2\\-$4$5");
+    }
+
+    // Descança-braço
+    matcher = DESCANSA.matcher(information);
+
+    if (matcher.find()) {
+      information = matcher.replaceAll("$1$2\\-$4$5");
+    }
+
+    information = information.trim();
+
+    return information;
   }
 }
