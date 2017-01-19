@@ -7,12 +7,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.lucassouza.icarrosreader.model.Brand;
 import org.lucassouza.icarrosreader.model.Model;
 import org.lucassouza.icarrosreader.model.Version;
@@ -44,9 +44,9 @@ public class ModelXLS {
 
   public void saveToFiles(List<Brand> brands) throws IOException {
     FileOutputStream file;
-    Workbook workbook;
+    SXSSFWorkbook workbook;
 
-    workbook = new XSSFWorkbook();
+    workbook = new SXSSFWorkbook(50);
     this.writeVersionsAndPricesSheet(workbook, brands);
     this.writeInformationSheet(workbook, brands);
     this.writeToOpinionSheet(workbook, brands);
@@ -54,6 +54,7 @@ public class ModelXLS {
     file = new FileOutputStream(this.path + "icarros.xlsx");
     workbook.write(file);
     file.close();
+    workbook.dispose();
   }
 
   private void writeVersionsAndPricesSheet(Workbook workbook, List<Brand> brands) throws IOException {
@@ -141,7 +142,6 @@ public class ModelXLS {
     labels.add("Modelo");
     labels.add("Ano");
     labels.add("Preço");
-    informations.forEach(System.out::println);
     labels.addAll(informations);
     labels.add("Data da Consulta");
 
