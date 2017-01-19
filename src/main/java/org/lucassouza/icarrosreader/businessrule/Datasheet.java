@@ -76,6 +76,9 @@ public class Datasheet {
     Comunicator.getInstance().informAmount(ResourceType.MODEL, models.size());
 
     for (Model model : models) {
+      if (!model.getName().startsWith("Palio Weekend")) {
+        continue;
+      }
       try {
         this.fillModel(model);
       } catch (HttpStatusException hse) {
@@ -147,13 +150,19 @@ public class Datasheet {
   private void fillVersion(Version version) throws IOException {
     Content byVersion;
     String complement;
+    HashMap<String, String> fields;
 
-    complement = "/catalogo/fichatecnica.jsp?"
-            + "modelo=" + version.getYear().getModel().getId()
-            + "&anomodelo=" + version.getYear().getYear()
-            + "&versao=" + version.getId();
+    fields = this.navigation.getFields();
+    fields.put("modelo", String.valueOf(version.getYear().getModel().getId()));
+    fields.put("anomodelo", String.valueOf(version.getYear().getYear()));
+    fields.put("versao", String.valueOf(version.getId()));
+
+    complement = "/catalogo/fichatecnica.jsp";
 
     byVersion = this.defaults.initialize()
+            .fields("modelo",
+                    "anomodelo",
+                    "versao")
             .complement(complement)
             .build();
 
